@@ -29,23 +29,13 @@ async def extract_urls_from_page(url: str, urls: dict, driver: webdriver) -> Non
                 urls[url_key[0]] = url
 
 async def extract_urls_from_chunk(urls: dict, page_urls: list[str]):
-    """Extracts URLs from a chunk of pages concurrently using asyncio."""
+    """Extracts URLs concurrently using asyncio."""
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
     try:
         tasks = [asyncio.create_task(extract_urls_from_page(url, urls, driver)) for url in page_urls]
         await asyncio.gather(*tasks)
     finally:
         driver.quit()  # Ensure explicit closing even if exceptions occur
-        
-# async def extract_urls_from_chunk(urls, page_urls):
-#     """Extracts URLs from a chunk of pages concurrently using asyncio."""
-#     start_time = time.perf_counter()  # Start timer for the entire chunk
-#     async with webdriver.Chrome(service=Service(ChromeDriverManager().install())) as driver:
-#         tasks = [asyncio.create_task(extract_urls_from_page(url, urls, driver)) for url in page_urls]
-#         await asyncio.gather(*tasks)
-#     driver.quit()
-#     end_time = time.perf_counter()
-#     print(f"Extracted URLs from {len(page_urls)} pages in {end_time - start_time:.2f} seconds (total)")  # Print performance for the whole chunk
 
 async def main():
     start_time = time.perf_counter()  # Start timer for the entire chunk
