@@ -5,7 +5,7 @@ This project is aimed at scraping real estate data from the Immoweb website usin
 
 ## Prerequisites
 - Python 3.x
-- Selenium
+- Scrapy
 - BeautifulSoup
 - Chrome WebDriver
 
