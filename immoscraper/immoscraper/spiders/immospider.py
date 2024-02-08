@@ -2,41 +2,33 @@ import scrapy
 from bs4 import BeautifulSoup
 import csv
 import json
+import pandas as pd
 
 class ImmospiderSpider(scrapy.Spider):
+    '''This spider scrapes immoweb.be for real estate data.'''
     name = "immospider"
     allowed_domains = ["immoweb.be"]
 
+    # List to store all URLs of the propeties to prevent duplicates
     urls = []
+    # Dictionary to store the data of each property
+    data_dict = {}
+    #df = pd.DataFrame()
 
-    filename = "all_data.csv"
-    header = [
-        "URL", "ID", "Price", "Location", "Type", "Subtype", "Bedrooms",
-        "Land Surface", "Kitchen Type", "Fireplace Exists", "Has Terrace",
-        "Terrace Surface", "Has Garden", "Garden Surface", "Net Habitable Surface",
-        "Facade Count", "Has Swimming Pool", "Is Newly Built"
-    ]
-
-    def write_to_csv(data, filename):
-        with open(filename, 'a', newline='', encoding='utf-8') as f:
+    with open("all_data.csv", 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerow(data)
-
-    write_to_csv(header, filename)
-
-    def safe_get(dictionary, *keys, default=None):
-            """
-            Safely retrieve nested dictionary values without raising AttributeError.
-            """
-            for key in keys:
-                if isinstance(dictionary, dict) and key in dictionary:
-                    dictionary = dictionary[key]
-                else:
-                    return default
-            return dictionary
-
+            fieldnames = [
+                "URL", "ID", "Type of Sale", "Year of Construction", "Price", "Location", "Type", "Subtype", "Bedrooms",
+                "Land Surface", "Kitchen Type", "Fireplace Exists", "Has Terrace",
+                "Terrace Surface", "Has Garden", "Garden Surface", "Net Habitable Surface",
+                "Facade Count", "Has Swimming Pool", "Is Newly Built",
+                "Number of Rooms", "Area", "Kitchen", "Furnished", "Fireplace",
+                "Terrace Area", "Garden Area", "Land", "Number of Facades", "Pool", "State"
+            ]
+            writer.writerow(fieldnames)
 
     def start_requests(self):
+        '''Function to start the scraping process.'''
         base_url = "https://www.immoweb.be/en/search"  # Base URL for all pages
         house_endpoints = ["/house", "/apartment"]
         for_sale_endpoint = "/for-sale"
@@ -45,50 +37,38 @@ class ImmospiderSpider(scrapy.Spider):
         public_sale_endpoint = "&isAPublicSale=false"
         order_by_endpoints = ["&orderBy=newest", "&orderBy=relevance", "&orderBy=cheapest", "&orderBy=most_expensive", "&orderBy=postal_code"]
         
+        # Loop through all the combinations of endpoints to get all possible pages of the website
         for house_endpoint in house_endpoints:
             for order_by_endpoint in order_by_endpoints:
-                for page in range(1, 3):
+                for page in range(1, 2):
+                    # Construct the URL to send the request to
                     url = f'{base_url}{house_endpoint}{for_sale_endpoint}{country_endpoint}{life_annuity_endpoint}{public_sale_endpoint}{order_by_endpoint}&page={page}'
+                    # Send a request to the URL and call the parse function
                     yield scrapy.Request(url, callback=self.parse)
         
-        #print(ImmospiderSpider.urls)
+        # print(ImmospiderSpider.urls, len(ImmospiderSpider.urls))
+        #print(ImmospiderSpider.pd)
 
     def parse(self, response):
+        '''Function to parse the response and extract the URLs of the properties.'''
         r_urls = response.xpath('//div[@class="card--result__body"]//a[@class="card__title-link"]/@href').getall()
         for url in r_urls:
             if url not in ImmospiderSpider.urls:
+                # Append the URL to the list of URLs
                 ImmospiderSpider.urls.append(url)
+                # Send a request to the individual property URL and call the parse_details function
                 yield scrapy.Request(url, callback=self.parse_details)
 
             
     def parse_details(self, response):
+        '''Function to parse the details of the individual property, convert them and write a line to a CSV file.'''
         r_details = response.xpath('//div[@id="container-main-content"]//script[@type="text/javascript"]/text()').get()
-        print(r_details)
+        #print(r_details)
         soup = BeautifulSoup(r_details, 'html.parser')
-        all_data = soup.text.strip()
-        data_dict = json.loads(all_data.replace('window.classified =', '').replace(';', ''))
-        print(data_dict)
-        '''row = [
-            response.url,
-            data_dict["id"],
-            data_dict["price"]["mainValue"],
-            f"{data_dict['property']['location']['postalCode']}/{data_dict['property']['location']['locality']}",
-            data_dict["property"]["type"],
-            data_dict["property"]["subtype"],
-            data_dict["property"]["bedroomCount"],
-            self.safe_get(data_dict, "property", "land", "surface", default=""),
-            self.safe_get(data_dict, "property", "kitchen", "type", default=""),
-            self.safe_get(data_dict["property"], "fireplaceExists", default=""),
-            self.safe_get(data_dict["property"], "hasTerrace", default=""),
-            self.safe_get(data_dict["property"], "terraceSurface", default=""),
-            self.safe_get(data_dict["property"], "hasGarden", default=""),
-            self.safe_get(data_dict["property"], "gardenSurface", default=""),
-            data_dict["property"]["netHabitableSurface"],
-            self.safe_get(data_dict["property"]["building"], "facadeCount", default=""),
-            self.safe_get(data_dict["property"], "hasSwimmingPool", default=""),
-            self.safe_get(data_dict["flags"], "isNewlyBuilt", default="")
-        ]
-        self.write_to_csv(row, ImmospiderSpider.filename)'''
-        
-
+        property_data = soup.text.strip().replace('window.classified = ', '').replace(';', '')
+        property_dict : dict = json.loads(property_data)
+        df = pd.DataFrame.from_dict(property_dict, orient='index')
+        df.to_csv('out.csv', index=False)
+        # Create a PropertyListing object
+        #listing = PropertyListing(property_dict)
         
