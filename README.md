@@ -34,15 +34,12 @@ Number of facades
 Swimming pool (0/1)
 State of building (new, to be renovated, ...)
 
-## Prerequisites
 
-1. Python 3.x
-2. Install necessary packages: `pip install -r requirements.txt`
 
 ## Installation
 
 1. Clone the repository to your local machine: `git clone https://github.com/Nithyaraaj21/immo-eliza-scraping-FireFlies`
-2. Ensure you have Python installed (version 3.6 or higher).
+2. Ensure you have Python installed (version 3.10 or higher).
 3. Install the required libraries by running:
     ```
     pip install -r requirements.txt
