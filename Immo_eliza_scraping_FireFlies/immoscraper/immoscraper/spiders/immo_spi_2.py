@@ -1,6 +1,8 @@
+from time import perf_counter
+start_time = perf_counter()
+
 import scrapy
 from bs4 import BeautifulSoup
-import csv
 import json
 import pandas as pd
 
@@ -24,7 +26,7 @@ class ImmospiderSpider(scrapy.Spider):
         # Loop through all the combinations of endpoints to get all possible pages of the website
         for house_endpoint in house_endpoints:
             for order_by_endpoint in order_by_endpoints:
-                for page in range(1, 2):
+                for page in range(1, 334):
                     # Construct the URL to send the request to
                     url = f'{base_url}{house_endpoint}{for_sale_endpoint}{country_endpoint}{life_annuity_endpoint}{public_sale_endpoint}{order_by_endpoint}&page={page}'
                     # Send a request to the URL and call the parse function
@@ -65,14 +67,15 @@ class ImmospiderSpider(scrapy.Spider):
             condition = property_dict.get('property', {}).get('building', {}).get('condition')
             land_surface = property_dict.get('property', {}).get('land', {}).get('surface')
             kitchen_type = property_dict.get('property', {}).get('kitchen', {}).get('type')
-            facadeCount = property_dict.get('property', {}).get('building', {}).get('facadeCount'),
+            facadeCount = property_dict.get('property', {}).get('building', {}).get('facadeCount')
         except AttributeError as e:
-            self.logger.error(f'Error extracting property details: {e}')
+            print(f'Error extracting property details: {e}')
             construction_year = None
             condition = None
             land_surface = None
             kitchen_type = None
             facadeCount = None
+
         
         sale_type = None
         flags = property_dict.get('flags', {})
@@ -82,32 +85,36 @@ class ImmospiderSpider(scrapy.Spider):
             sale_type = 'Notary Sale'
         elif flags.get('isAnInteractiveSale'):
             sale_type = 'Interactive Sale'
-        row = [
-            response.url,
-            property_dict.get('id', ''),
-            property_dict.get('price', {}).get('mainValue', ''),
-            property_dict.get('property', {}).get('location', {}).get('postalCode', ''),
-            property_dict.get('property', {}).get('location', {}).get('locality', ''),
-            construction_year,
-            condition,
-            property_dict.get('property', {}).get('type', ''),
-            property_dict.get('property', {}).get('subtype', ''),
-            property_dict.get('property', {}).get('bedroomCount', ''),
-            land_surface,
-            kitchen_type,
-            sale_type,
-            convert_value(property_dict.get('property', {}).get('fireplaceExists')),
-            convert_value(property_dict.get('property', {}).get('hasTerrace')),
-            convert_value(property_dict.get('property', {}).get('terraceSurface')),
-            convert_value(property_dict.get('property', {}).get('hasGarden')),
-            convert_value(property_dict.get('property', {}).get('gardenSurface')),
-            convert_value(property_dict.get('property', {}).get('netHabitableSurface')),
-            facadeCount,
-            convert_value(property_dict.get('property', {}).get('hasSwimmingPool')),
-            #convert_value(property_dict.get('property', {}).get('building', {}).get('condition')),
-        ]
         
-        # Append the row to the CSV file
-        with open("all_data.csv", 'a', newline='', encoding='utf-8') as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+        # Creating a DataFrame with the extracted data
+        data = {
+            'URL': [response.url],
+            'ID': [property_dict.get('id', '')],
+            'Price': [property_dict.get('price', {}).get('mainValue', '')],
+            'Postal Code': [property_dict.get('property', {}).get('location', {}).get('postalCode', '')],
+            'Locality': [property_dict.get('property', {}).get('location', {}).get('locality', '')],
+            'Construction Year': [construction_year],
+            'Condition': [condition],
+            'Type': [property_dict.get('property', {}).get('type', '')],
+            'Subtype': [property_dict.get('property', {}).get('subtype', '')],
+            'Bedroom Count': [property_dict.get('property', {}).get('bedroomCount', '')],
+            'Land Surface': [land_surface],
+            'Kitchen Type': [kitchen_type],
+            'Sale Type': [sale_type],
+            'Fireplace Exists': [convert_value(property_dict.get('property', {}).get('fireplaceExists'))],
+            'Has Terrace': [convert_value(property_dict.get('property', {}).get('hasTerrace'))],
+            'Terrace Surface': [convert_value(property_dict.get('property', {}).get('terraceSurface'))],
+            'Has Garden': [convert_value(property_dict.get('property', {}).get('hasGarden'))],
+            'Garden Surface': [convert_value(property_dict.get('property', {}).get('gardenSurface'))],
+            'Net Habitable Surface': [convert_value(property_dict.get('property', {}).get('netHabitableSurface'))],
+            'Facade Count': [facadeCount],
+            'Has Swimming Pool': [convert_value(property_dict.get('property', {}).get('hasSwimmingPool'))]
+        }
+        
+        df = pd.DataFrame(data)
+        
+        # Append the DataFrame to the CSV file
+        df.to_csv("all_data.csv", mode='a', index=False, header=False)
+
+    print(f"\nTime spent to finish the task: {perf_counter() - start_time} seconds.")
+
