@@ -36,7 +36,11 @@ The Real Estate Web Scraping is a Python-project aimed at scraping real estate d
 
  ```
 4. The script will start scraping real estate data from immoweb.be and save it into a CSV file named `all_data.csv` in the same directory.
-5. 
+
+
+## Flowchart
+
+![Flowchart](flowchart.png)
 ## Flowchart
 
 Start
