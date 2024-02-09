@@ -27,7 +27,8 @@ async def extract_urls_from_page(url: str, urls: dict, driver: webdriver) -> Non
             url_key = re.findall("\\d+$", url)
             if url_key:
                 urls[url_key[0]] = url
-
+    driver.quit()
+    
 async def extract_urls_from_chunk(urls: dict, page_urls: list[str]):
     """Extracts URLs concurrently using asyncio."""
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
