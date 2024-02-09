@@ -1,3 +1,5 @@
+![Web-data-scraping](real-estate-web-scraping.jpg)
+
 # Real Estate Data Scraper (Immospider)
 
 ## Table of Contents
@@ -38,8 +40,12 @@ State of building (new, to be renovated, ...)
 
 ## Installation
 
-1. Clone the repository to your local machine: `git clone https://github.com/Nithyaraaj21/immo-eliza-scraping-FireFlies`
+1. Clone the repository to your local machine:
+    ```
+    git clone https://github.com/Nithyaraaj21/immo-eliza-scraping-FireFlies
+    ```
 2. Ensure you have Python installed (version 3.10 or higher).
+
 3. Install the required libraries by running:
     ```
     pip install -r requirements.txt
@@ -49,10 +55,9 @@ State of building (new, to be renovated, ...)
 1. Open a terminal or command prompt.
 2. Navigate to the directory where the script is located.
 3. Run the script:
- ```
-   python main.py
-
- ```
+    ```
+    python main.py
+    ```
 4. The script will start scraping real estate data from immoweb.be and save it into a CSV file named `all_data.csv` in the same directory.
 
 
@@ -70,4 +75,4 @@ Contributions are welcome!
 
 ## License
 
-The Wikipedia Scraper project is licensed under the [MIT License](./LICENSE.md).
+The Real Estate Data Scraper project is licensed under the [MIT License](./LICENSE.md).
