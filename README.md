@@ -11,7 +11,28 @@
 
 ## Overview
 
-The Real Estate Web Scraping is a Python-project aimed at scraping real estate data from the Immoweb website using Python. The data includes information such as property details, location, price, and more.
+This Python script is designed to scrape real estate data from the immoweb.be website. It utilizes the Scrapy framework for web scraping and BeautifulSoup for parsing HTML content. The scraped data is then processed and saved into a CSV file using the pandas library.
+
+The final dataset has following columns:
+
+Property ID
+Locality name
+Postal code
+Price
+Type of property (house or apartment)
+Subtype of property (bungalow, chalet, mansion, ...)
+Type of sale (note: exclude life sales)
+Number of rooms
+Living area (area in m²)
+Equipped kitchen (0/1)
+Furnished (0/1)
+Open fire (0/1)
+Terrace (area in m² or null if no terrace)
+Garden (area in m² or null if no garden)
+Surface of good
+Number of facades
+Swimming pool (0/1)
+State of building (new, to be renovated, ...)
 
 ## Prerequisites
 
@@ -41,42 +62,6 @@ The Real Estate Web Scraping is a Python-project aimed at scraping real estate d
 ## Flowchart
 
 ![Flowchart](flowchart.png)
-## Flowchart
-
-Start
-|
-v
-Initialize or generate Spider
-|
-v
-Generate URLs
-|
-v
-Send Requests to URLs
-|
-v
-Parse Response (URLs)
-|
-v
-Loop through URLs:
-|
-v
-Send Request to Listing
-|
-v
-Parse Response (Listing)
-|
-v
-Extract Property Details
-|
-v
-Convert to DataFrame (df)
-|
-v
-Append DataFrame to CSV File
-|
-v
-End
 
 
 ## Support
