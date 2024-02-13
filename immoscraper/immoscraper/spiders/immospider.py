@@ -18,20 +18,18 @@ class ImmospiderSpider(scrapy.Spider):
 
     def start_requests(self):
         '''Function to start the scraping process.'''
-        base_url = "https://www.immoweb.be/en/search"  # Base URL for all pages
-        house_endpoints = ["/house", "/apartment"]
-        for_sale_endpoint = "/for-sale"
-        country_endpoint = "?countries=BE"
+        base_url = "https://www.immoweb.be/en/search/house-and-apartment/for-sale"  # Base URL for all pages
         life_annuity_endpoint = "&isALifeAnnuitySale=false"
         public_sale_endpoint = "&isAPublicSale=false"
-        order_by_endpoints = ["&orderBy=newest", "&orderBy=relevance", "&orderBy=cheapest", "&orderBy=most_expensive", "&orderBy=postal_code"]
+        province_endpoints = ["/antwerp/province?countries=BE", "/brussels/province?countries=BE", "/east-flanders/province?countries=BE","/flemish-brabant/province?countries=BE","/hainaut/province?countries=BE","/liege/province?countries=BE","/limburg/province?countries=BE", "/luxembourg/province?countries=BE", "/namur/province?countries=BE", "/walloon-brabant/province?countries=BE", "/west-flanders/province?countries=BE"]
+        order_by_endpoints = ["&orderBy=newest", "&orderBy=relevance", "&orderBy=cheapest", "&orderBy=most_expensive"]
         
         # Loop through all the combinations of endpoints to get all possible pages of the website
-        for house_endpoint in house_endpoints:
+        for province_endpoint in province_endpoints:
             for order_by_endpoint in order_by_endpoints:
                 for page in range(1, 334):
                     # Construct the URL to send the request to
-                    url = f'{base_url}{house_endpoint}{for_sale_endpoint}{country_endpoint}{life_annuity_endpoint}{public_sale_endpoint}{order_by_endpoint}&page={page}'
+                    url = f'{base_url}{province_endpoint}{public_sale_endpoint}{life_annuity_endpoint}{order_by_endpoint}&page={page}'
                     # Send a request to the URL and call the parse function
                     yield scrapy.Request(url, callback=self.parse)
         print(f'Number of urls: {len(ImmospiderSpider.urls)}')
