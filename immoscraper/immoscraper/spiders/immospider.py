@@ -1,7 +1,4 @@
-
-
 from time import perf_counter
-
 start_time = perf_counter()
 
 import scrapy
@@ -19,18 +16,20 @@ class ImmospiderSpider(scrapy.Spider):
 
     def start_requests(self):
         '''Function to start the scraping process.'''
-        base_url = "https://www.immoweb.be/en/search/house-and-apartment/for-sale"  # Base URL for all pages
+        base_url = "https://www.immoweb.be/en/search"  # Base URL for all pages
+        house_endpoints = ["/house", "/apartment"]
+        for_sale_endpoint = "/for-sale"
+        country_endpoint = "?countries=BE"
         life_annuity_endpoint = "&isALifeAnnuitySale=false"
-        public_sale_endpoint = "&isAPublicSale=false"
-        province_endpoints = ["/antwerp/province?countries=BE", "/brussels/province?countries=BE", "/east-flanders/province?countries=BE","/flemish-brabant/province?countries=BE","/hainaut/province?countries=BE","/liege/province?countries=BE","/limburg/province?countries=BE", "/luxembourg/province?countries=BE", "/namur/province?countries=BE", "/walloon-brabant/province?countries=BE", "/west-flanders/province?countries=BE"]
-        order_by_endpoints = ["&orderBy=newest", "&orderBy=relevance", "&orderBy=cheapest", "&orderBy=most_expensive"]
+        #public_sale_endpoint = "&isAPublicSale=false"
+        order_by_endpoints = ["&orderBy=newest", "&orderBy=relevance", "&orderBy=cheapest", "&orderBy=most_expensive", "&orderBy=postal_code"]
         
         # Loop through all the combinations of endpoints to get all possible pages of the website
-        for province_endpoint in province_endpoints:
+        for house_endpoint in house_endpoints:
             for order_by_endpoint in order_by_endpoints:
                 for page in range(1, 334):
                     # Construct the URL to send the request to
-                    url = f'{base_url}{province_endpoint}{public_sale_endpoint}{life_annuity_endpoint}{order_by_endpoint}&page={page}'
+                    url = f'{base_url}{house_endpoint}{for_sale_endpoint}{country_endpoint}{life_annuity_endpoint}{order_by_endpoint}&page={page}'
                     # Send a request to the URL and call the parse function
                     yield scrapy.Request(url, callback=self.parse)
         print(f'Number of urls: {len(ImmospiderSpider.urls)}')
@@ -70,6 +69,15 @@ class ImmospiderSpider(scrapy.Spider):
             land_surface = property_dict.get('property', {}).get('land', {}).get('surface')
             kitchen_type = property_dict.get('property', {}).get('kitchen', {}).get('type')
             facadeCount = property_dict.get('property', {}).get('building', {}).get('facadeCount')
+            heating_type =  property_dict.get('property', {}).get('energy', {}).get('heatingType')
+            Double_glazing =  convert_value(property_dict.get('property', {}).get('energy', {}).get('hasDoubleGlazing'))
+            energy_consumption_level = property_dict.get('transaction').get('certificates', {}).get('primaryEnergyConsumptionPerSqm')
+            EPC_score= property_dict.get('transaction').get('certificates', {}).get('epcScore')
+            Cadastral_income = property_dict.get('transaction').get('sale', {}).get('cadastralIncome')
+            #has_office_space = property_dict.get('specificities', {}).get('SME', {}).get('office', {}).get('exists')
+            indoor_parking_spaces = property_dict.get('property', {}).get('parkingCountIndoor')
+            outdoor_parking_spaces = property_dict.get('property', {}).get('parkingCountOutdoor')
+            closed_box_parking_spaces = property_dict.get('property', {}).get('parkingCountClosedBox')
         except AttributeError as e:
             print(f'Error extracting property details: {e}')
             construction_year = None
@@ -77,6 +85,15 @@ class ImmospiderSpider(scrapy.Spider):
             land_surface = None
             kitchen_type = None
             facadeCount = None
+            heating_type = None
+            energy_consumption_level = None
+            #has_office_space = None
+            indoor_parking_spaces = None
+            outdoor_parking_spaces = None
+            closed_box_parking_spaces = None
+            EPC_score = None
+            Double_glazing= None
+            Cadastral_income = None
 
         
         sale_type = None
@@ -90,37 +107,49 @@ class ImmospiderSpider(scrapy.Spider):
         
         # Creating a DataFrame with the extracted data
         data = {
-            'URL': [response.url],
+            #'URL': [response.url],
             'ID': [property_dict.get('id', '')],
             'Price': [property_dict.get('price', {}).get('mainValue', '')],
-            'Postal Code': [property_dict.get('property', {}).get('location', {}).get('postalCode', '')],
+            'region': [property_dict.get('property', {}).get('location', {}).get('region', '')],
+            'provience': [property_dict.get('property', {}).get('location', {}).get('province', '')],
+            'District': [property_dict.get('property', {}).get('location', {}).get('district', '')],
+            'Postal_Code': [property_dict.get('property', {}).get('location', {}).get('postalCode', '')],
             'Locality': [property_dict.get('property', {}).get('location', {}).get('locality', '')],
-            'Construction Year': [construction_year],
+            'Latitude': [property_dict.get('property', {}).get('location', {}).get('latitude', '')],
+            'Longitude': [property_dict.get('property', {}).get('location', {}).get('longitude', '')],
+            'Construction_Year': [construction_year],
             'Condition': [condition],
             'Type': [property_dict.get('property', {}).get('type', '')],
             'Subtype': [property_dict.get('property', {}).get('subtype', '')],
-            'Bedroom Count': [property_dict.get('property', {}).get('bedroomCount', '')],
-            'Land Surface': [land_surface],
-            'Kitchen Type': [kitchen_type],
-            'Sale Type': [sale_type],
-            'Fireplace Exists': [convert_value(property_dict.get('property', {}).get('fireplaceExists'))],
-            'Has Terrace': [convert_value(property_dict.get('property', {}).get('hasTerrace'))],
-            'Terrace Surface': [convert_value(property_dict.get('property', {}).get('terraceSurface'))],
-            'Has Garden': [convert_value(property_dict.get('property', {}).get('hasGarden'))],
-            'Garden Surface': [convert_value(property_dict.get('property', {}).get('gardenSurface'))],
-            'Net Habitable Surface': [convert_value(property_dict.get('property', {}).get('netHabitableSurface'))],
-            'Facade Count': [facadeCount],
-            'Has Swimming Pool': [convert_value(property_dict.get('property', {}).get('hasSwimmingPool'))]
+            'Bedroom_Count': [property_dict.get('property', {}).get('bedroomCount', '')],
+            'Land_Surface': [land_surface],
+            'Kitchen_Type': [kitchen_type],
+            'Sale_Type': [sale_type],
+            'Furnished': [convert_value(property_dict.get('transaction').get('sale',{}).get('isFurnished'))],
+            'Fireplace_Exists': [convert_value(property_dict.get('property', {}).get('fireplaceExists'))],
+            'Has_Terrace': [convert_value(property_dict.get('property', {}).get('hasTerrace'))],
+            'Terrace_Surface': [convert_value(property_dict.get('property', {}).get('terraceSurface'))],
+            'Has_Garden': [convert_value(property_dict.get('property', {}).get('hasGarden'))],
+            'Garden_Surface': [convert_value(property_dict.get('property', {}).get('gardenSurface'))],
+            'Habitable_Surface': [convert_value(property_dict.get('property', {}).get('netHabitableSurface'))],
+            'Facade_Count': [facadeCount],
+            'Swimming_Pool': [convert_value(property_dict.get('property', {}).get('hasSwimmingPool'))],
+            #'Has Swimming Pool': [property_dict.get('property', {}).get('wellnessEquipment', {}).get('hasSwimmingPool')],
+            'Indoor_Parking': [indoor_parking_spaces],
+            'Outdoor_Parking': [outdoor_parking_spaces],
+            #'Closed_Box_Parking': [closed_box_parking_spaces],
+            'Heating_Type': [heating_type],
+            'Energy_Consumption_Level': [energy_consumption_level],
+            'EPC':[EPC_score],
+            'Double_glazing':[Double_glazing],
+            #'Has Office Space': [has_office_space],
+            'Cadastral_income': [Cadastral_income]
         }
         
         df = pd.DataFrame(data)
             # Append the DataFrame to the CSV file
-        if not os.path.isfile("immo_raw.csv"):
-                df.to_csv("immo_raw.csv", mode='a', index=False, header=True)
+        if not os.path.isfile("immoweb_raw_vf.csv"):
+                df.to_csv("immoweb_raw_vf.csv", mode='a', index=False, header=True)
         else:
-                df.to_csv("immo_raw.csv", mode='a', index=False, header=False)
+                df.to_csv("immoweb_raw_vf.csv", mode='a', index=False, header=False)
     print(f"\nTime spent to finish the task: {perf_counter() - start_time} seconds.")
-
-
-
-
