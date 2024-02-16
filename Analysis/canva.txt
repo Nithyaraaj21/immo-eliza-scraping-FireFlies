@@ -1,0 +1,33 @@
+The pitch: Current land occupation further strenghtens price consolidation because of lack of space 
+
+The story: [Once upon a time, in a kingdom called Belgium], Residential property accounted for 9% of land use yet 
+prices' ramp up was up for a long time. Thanks to demographic and societal trends, real estate in Belgium has indeed 
+remained a strong market. In this presentation , we will review the factors that affects real estate prices at various
+levels: nation-wise, regionally and from a local perspective in Brussels.
+
+Slide 1: 
+
+Title: A two-tier business with Brussels standing in the middle
+
+Text: Flanders appears first as a defensive market with the most upper-range properties. On the other hand,
+Wallonia provides leeway for growth while Brussels seems to reflect both dynamics.
+
+Note: This suggests properties developments are not on the same stage depending on the location. 
+In the next slide, I will be studying a basic housing-unit from each 'Price Category' to either confirm or deny my 
+previous statements regarding Flanders and Wallonia. Brussels will be studied apart. 
+
+Slide 2: 
+!!!! Need to be talked after correlation maps have been explained (# bedrooms, outside space, pool?)
+
+Images: Whole slide, no text
+
+Note: For each price category, I merge the median and average housing-unit.
+This has strongly reinforced the intuition we had first, also pools seems to be a "nouveau-riche" kind of thing.
+
+Slide 3: Brussels explained, asked Polina to draw a map with different price per m2 + basic unit
+
+
+Slide 4: Differentiation factors explain discrepancies across 'Price Category' ?
+- Demography
+- Outside space
+- Efficiency
